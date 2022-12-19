@@ -41,6 +41,7 @@ end
 
 prompt messages('welcome')
 
+# Asks for user's name
 name = ''
 loop do
   name = gets.chomp
@@ -102,10 +103,15 @@ loop do # main loop
            when '3'
              number1.to_f * number2.to_f
            when '4'
-             number1.to_f / number2.to_f
+             # Checks if second number is 0, and if so then tell error
+             if number2 == '0'
+              puts "Sorry, I can't do division by 0"
+             else
+              number1.to_f / number2.to_f
+             end
            end
 
-  prompt format(messages('result'), result: result)
+  prompt format(messages('result'), result: result) unless result == nil # Doesn't print calculation if division by 0
 
   prompt messages('ask_again')
   answer = gets.chomp
