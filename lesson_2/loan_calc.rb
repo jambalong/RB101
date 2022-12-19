@@ -103,7 +103,7 @@ loop do
 
     Loan Amount:    $#{format('%.2f', amount)}
     Loan Duration:  #{format('%d', duration)} months
-    Loan APR:       #{format('%g', interest * 100)}%
+    Loan APR:       #{format('%g', apr * 100)}%
 
   Your monthly payment will be: $#{format('%.2f', payment)}
 
