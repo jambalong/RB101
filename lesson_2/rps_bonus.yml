@@ -1,0 +1,49 @@
+instructions?: "Would you like to view the instructions? [y/n]"
+rules: |
+  Rock, Paper, Scissors, Lizard, Spock
+
+  First to THREE wins!
+
+  Scissors   cuts          Paper
+  Paper      covers        Rock
+  Rock       crushes       Lizard
+  Lizard     poisons       Spock
+  Spock      smashes       Scissors
+  Scissors   decapitates   Lizard
+  Lizard     eats          Paper
+  Paper      disproves     Spock
+  Spock      vaporizes     Rock
+  Rock       crushes       Scissors
+
+  => Press ENTER to Start!
+
+moves: |
+  Please type in your move:
+
+    'r'  = Rock
+    'p'  = Paper
+    'sc' = Scissors
+    'l'  = Lizard
+    'sp' = Spock
+    
+
+welcome: "Welcome to Rock, Paper, Scissors, Lizard, Spock Game!\n\n"
+player_name: "Enter your player name:"
+greeting: "Hello, %{name}! Game is starting..."
+
+not_valid: "That is not a valid choice. Try again!"
+
+what_move: "What is your move %{name}?"
+computer_move: "Computer is deciding their move...\n\n"
+player: "%{name} chose: %{move}"
+computer: "Computer chose: %{move}\n\n"
+
+win: "Awesome. You win this round!"
+tie: "Well... It's a tie. Next round!"
+lose: "This time, Computer wins the round!"
+
+game_won: "Congratulations! You have beaten the computer! You WIN!\n\n"
+game_lost: "Better luck next time! Computer has won the game!\n\n"
+
+again: "Play again? [y/n]"
+goodbye: "Thank you for playing the Rock, Paper, Scissors, Lizard, Spock, GAME!!!~"
