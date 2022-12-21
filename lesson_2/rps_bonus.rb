@@ -1,25 +1,79 @@
 # Rock Paper Scissors Spock Lizard
 
-VALID_CHOICES = {
+VALID_MOVES = {
   "r" => "rock",
   "p" => "paper",
   "sc" => "scissors",
   "sp" => "spock",
-  "l" => "lizard",
+  "l" => "lizard"
 }
 
-# Player choice beats Computer choices
+# Player move beats Computer moves
 WIN_MATRIX = {
   "rock" => %w[scissors lizard],
   "paper" => %w[rock spock],
   "scissors" => %w[paper lizard],
   "spock" => %w[rock scissors],
-  "lizard" => %w[paper spock],
+  "lizard" => %w[paper spock]
+}
+
+# Win 'x' rounds to win the game
+WIN_STATE = 3
+
+# Messages for prompts
+MESSAGES = {
+  moves: <<-MSG,
+Please type in your move:
+
+  'r'  = Rock
+  'p'  = Paper
+  'sc' = Scissors
+  'sp' = Spock
+  'l'  = Lizard
+
+MSG
+  welcome: "Welcome to Rock, Paper, Scissors, Spock, Lizard Game! \n\n",
+  player_name: "Enter your player name:",
+  greeting: "Hello, %{name}. Let's begin!\n\n",
+  what_move: "What is your move %{name}?",
+  not_valid: "That is not a valid move. Try again!",
+  computer_move: "Computer is deciding their move...\n\n",
+  player: "Player chose: %{move}",
+  computer: "Computer chose: %{move}\n\n",
+  win: "Awesome. You win this round!",
+  tie: "Well... It's a tie. Next round!",
+  lose: "This time, Computer wins the round!",
+  game_won: "Congratulations! You have beaten the computer! You WIN!",
+  game_lost: "Better luck next time! Computer has won the game!",
+  again: "Play again? [y/n]",
+  goodbye:
+    "Thank you for playing the Rock Paper Scissors Spock Lizard GAME!!!~"
 }
 
 # Adds '=>' to prompted messages
 def prompt(message)
   puts "=> #{message}"
+end
+
+# Asks the player for their move
+def what_move?(name)
+  prompt format(MESSAGES[:what_move], name: name)
+
+  get_move
+end
+
+# Gets a valid player move input
+def get_move
+  loop do
+    move = gets.chomp.downcase
+
+    if VALID_MOVES.include?(move)
+      move = VALID_MOVES[move]
+      return move
+    else
+      prompt MESSAGES[:not_valid]
+    end
+  end
 end
 
 # Checks each player moves and returns which player wins
@@ -34,38 +88,52 @@ def who_wins?(player_move, computer_move)
 end
 
 # Checks player counts and returns whoever won
-def check_count(player_count, computer_count)
-  (player_count > computer_count) ? "player_win" : "computer_win"
+def game_winner?(player, computer)
+  player > computer ? :game_won : :game_lost
 end
 
 # Displays win messages based on the round result
 def display_results(result)
   if result == "player"
-    prompt "Awesome. You win this round!"
+    prompt MESSAGES[:win]
   elsif result == "tie"
-    prompt "Well... It's a tie. Next round!"
+    prompt MESSAGES[:tie]
   else
-    prompt "This time, Computer wins the round!"
+    prompt MESSAGES[:lose]
   end
 end
 
-# Message for choice abbreviations (note: convert all prompts into a MSG hash would be ideal)
-choice_msg = <<-MSG
-Please type in your move:
+# Display Player and Computer moves
+def display_moves(player_move, computer_move)
+  prompt format(MESSAGES[:player], move: player_move)
+  sleep(0.5)
+  prompt format(MESSAGES[:computer], move: computer_move)
+  sleep(1)
+end
 
-  'r'  = Rock
-  'p'  = Paper
-  'sc' = Scissors
-  'sp' = Spock
-  'l'  = Lizard
+# Display Player and Computer counters
+def display_counter(player, computer)
+  prompt "Player: #{player}"
+  sleep(0.5)
+  prompt "Computer: #{computer}\n\n"
+  sleep(1)
+end
 
-MSG
+# Shows what moves each player has chosen
+def show_moves
+  prompt MESSAGES[:moves]
+end
+
+# Checks if either player has achieved WIN_STATE
+def game_end?(player, computer)
+  player == WIN_STATE || computer == WIN_STATE ? true : false
+end
 
 # Welcome message and takes the player's name
-prompt "Welcome to Rock, Paper, Scissors, Spock, Lizard Game! \n\n"
+prompt MESSAGES[:welcome]
 sleep(0.5)
 
-prompt "Enter your player name:"
+prompt MESSAGES[:player_name]
 name = gets.chomp
 
 puts "\n"
@@ -73,80 +141,50 @@ sleep(0.5)
 
 # Main Game loop
 loop do
-
-  # Initialize win counters to zero whenever Main Game starts again
+  # Initialize win counters to zero whenever Main Game starts
   player_count = 0
   computer_count = 0
 
-  prompt "Hello, #{name}. Let's begin!\n\n"
+  prompt format(MESSAGES[:greeting], name: name)
   sleep(1)
-
-  choice = ""
-  computer_choice = ""
 
   # Game Rounds loop
   loop do
-    prompt(choice_msg)
+    show_moves
+    # Asks for player move
+    player_move = what_move?(name)
 
-    choice = ""
-    
-    # Asks for player move choice loop
-    loop do
-      prompt "What is your move #{name}?"
-      choice = gets.chomp
-
-      if VALID_CHOICES.include?(choice)
-        choice = VALID_CHOICES[choice]
-        break
-      else
-        prompt "That is not a valid choice. Try again!"
-      end
-    end
-
-    # Computer choice made through VALID_CHOICES 's values sampled
-    computer_choice = VALID_CHOICES.values.sample
-    prompt "Computer is deciding their move...\n\n"
+    # Computer move made through VALID_MOVES 's values sampled
+    computer_move = VALID_MOVES.values.sample
+    prompt MESSAGES[:computer_move]
     sleep(1)
 
-    # Display both player's choice
-    prompt "Player chose: #{choice}"
-    sleep(0.5)
-    prompt "Computer chose: #{computer_choice}\n\n"
+    # Display both player's move
+    display_moves(player_move, computer_move)
+
+    # Display the results of the round
+    display_results(who_wins?(player_move, computer_move))
     sleep(1)
 
-    # Assign which player won to a result variable to be used
-    result = who_wins?(choice, computer_choice)
+    # Player and Computer win counter calculation based on result
+    player_count += 1 if who_wins?(player_move, computer_move) == "player"
+    computer_count += 1 if who_wins?(player_move, computer_move) == "computer"
 
-    display_results(result)
-    sleep(1)
-
-    # Player and Computer win counter based on result
-    player_count += 1 if result == 'player'
-    computer_count += 1 if result == 'computer'
-
-    prompt "Player: #{player_count}"
-    sleep(0.5)
-    prompt "Computer: #{computer_count}\n\n"
-    sleep(1)
+    # Display Player and Computer win counter
+    display_counter(player_count, computer_count)
 
     # Breaks the game round loops when either player reaches three wins
-    break if player_count == 3 || computer_count == 3
+    break if game_end?(player_count, computer_count)
   end
 
-  # Figures out who is the winner based on their counter
-  winner = check_count(player_count, computer_count)
+  # Display who won the game
+  prompt MESSAGES[game_winner?(player_count, computer_count)]
 
-  if winner == "player_win"
-    prompt "Congratulations! You have beaten the computer! You WIN!"
-  else
-    prompt "That's too bad! Computer has won this game!"
-  end
-
-  # Gets answer whether to play again, if not then breaks Main Game loop
-  prompt "Play again? [y/n]"
+  # Asks whether to play again, if not then end the program
+  prompt MESSAGES[:again]
   answer = gets.chomp
 
   break unless answer.downcase.start_with?("y")
 end
 
-prompt "Thank you for playing the Rock Paper Scissors Spock Lizard GAME!!!~"
+prompt MESSAGES[:goodbye]
