@@ -57,7 +57,7 @@ def game_end?(player, computer)
 end
 
 # Checks player counts and returns whoever won
-def game_winner?(player, computer)
+def game_winner(player, computer)
   player > computer ? 'game_won' : 'game_lost'
 end
 
@@ -78,7 +78,7 @@ end
 # Display instructions for the game
 def instructions
   prompt messages('instructions?')
-  answer = yes_no?()
+  answer = yes_no
   return if answer == false
   puts ''
   sleep(0.5)
@@ -102,14 +102,14 @@ def show_moves
 end
 
 # Asks the player for their move
-def what_move?(name)
+def what_move(name)
   prompt format(messages('what_move'), name: name)
 
   get_move
 end
 
 # Checks each player moves and returns which player wins
-def who_wins?(player_move, computer_move)
+def who_wins(player_move, computer_move)
   if WIN_MATRIX[player_move].include?(computer_move)
     'player'
   elsif player_move == computer_move
@@ -120,7 +120,7 @@ def who_wins?(player_move, computer_move)
 end
 
 # Takes yes or no inputs from player
-def yes_no?
+def yes_no
   loop do
     answer = gets.chomp
     if answer.downcase.start_with?('y')
@@ -165,7 +165,7 @@ loop do
   loop do
     show_moves
     # Asks for player move
-    player_move = what_move?(name)
+    player_move = what_move(name)
 
     # Computer move made through VALID_MOVES 's values sampled
     computer_move = VALID_MOVES.values.sample
@@ -177,12 +177,12 @@ loop do
     display_moves(player_move, computer_move, name)
 
     # Display the results of the round
-    display_results(who_wins?(player_move, computer_move))
+    display_results(who_wins(player_move, computer_move))
     sleep(2)
 
     # Player and Computer win counter calculation based on result
-    score[:player] += 1 if who_wins?(player_move, computer_move) == 'player'
-    score[:computer] += 1 if who_wins?(player_move, computer_move) == 'computer'
+    score[:player] += 1 if who_wins(player_move, computer_move) == 'player'
+    score[:computer] += 1 if who_wins(player_move, computer_move) == 'computer'
 
     # Display Player and Computer win counter
     display_counter(score[:player], score[:computer], name)
@@ -192,7 +192,7 @@ loop do
   end
 
   # Display who won the game
-  prompt messages(game_winner?(score[:player], score[:computer]))
+  prompt messages(game_winner(score[:player], score[:computer]))
 
   # Asks whether to play again, if not then end the program
   prompt messages('again')
