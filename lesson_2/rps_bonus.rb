@@ -12,7 +12,7 @@ WIN_MATRIX = {
   'paper'    => ['rock', 'spock'],
   'scissors' => ['paper', 'lizard'],
   'lizard'   => ['paper', 'spock'],
-  'spock'    => ['rock', 'scissors'],
+  'spock'    => ['rock', 'scissors']
 }
 
 VALID_MOVES = {
@@ -42,11 +42,12 @@ end
 
 # Displays win messages based on the round result
 def display_results(result)
-  if result == 'player'
+  case result
+  when 'player'
     prompt messages('win')
-  elsif result == 'tie'
+  when 'tie'
     prompt messages('tie')
-  else
+  when 'computer'
     prompt messages('lose')
   end
 end
