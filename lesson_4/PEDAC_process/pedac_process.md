@@ -8,6 +8,7 @@
   - Identify Implicit requirements
 - Spend enough time. Don't rush this step.
 
+```
 ## General Example
 
 Given a string, produce a new string with every other word removed.
@@ -21,6 +22,7 @@ Given a string, produce a new string with every other word removed.
   - What do we mean by every other word?
   - How do we define a word in this context?
     - Words are delimited by spaces
+```
 
 ## E: Examples and Test Cases
 
@@ -80,35 +82,42 @@ the integers in that row.
 - Output: a single integer
   - The sum of the integers in the row identified by the input integer
 
+```
 - Sequence:
-2, 4, 6, 8, 10, 12, 14, 16, 18, ....
+2, 4, 6, 8, 10, 12, 14, 16, 18, ...
 
 2
 4, 6
 8, 10, 12
 14, 16, 18, 20
-....
+...
+```
 
 - How do we create the structure?
 
 ## Examples
 
+```
 row number: 1 --> sum of integers in row: 2
 row number: 2 --> sum of integers in row: 10
 row number: 4 --> sum of integers in row: 68
+```
 
-
+```
 2 --> 2
 4, 6 --> 10
 14, 16, 18, 20 --> 68
+```
 
 ## Data Structures
 
+```
 2
 4, 6
 8, 10, 12
 14, 16, 18, 20
-....
+...
+```
 
 - Overall structure repesenting a sequence as a whole
 - Individual rows within overall structure
@@ -122,7 +131,7 @@ row number: 4 --> sum of integers in row: 68
 	[4, 6],
 	[8, 10, 12],
 	[14, 16, 18, 20],
-	....
+	...
 ]
 ```
 
