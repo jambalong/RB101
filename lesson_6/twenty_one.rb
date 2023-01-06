@@ -1,9 +1,11 @@
 # Twenty-One
 
-require 'pry-byebug'
-
 SUITS = %w(H D C S)
 VALUES = %w(2 3 4 5 6 7 8 9 10 J Q K A)
+WINSTATE = 5
+BUST_LIMIT = 21
+DEALER_STAY = BUST_LIMIT - 4
+
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -26,13 +28,13 @@ def deal_initial_hands(deck, player_hand, dealer_hand)
   end
 end
 
-def display_hands(player_hand, dealer_hand)
+def display_hands(player_hand, dealer_hand, player_value)
   prompt "Dealer has: #{dealer_hand[0]} and a [Hidden Card]"
-  prompt "Player has: #{player_hand} Hand Value: #{hand_value(player_hand)}\n\n"
+  prompt "Player has: #{player_hand} Hand Value: #{player_value}\n\n"
 end
 
-def busted?(hand)
-  hand_value(hand) > 21
+def busted?(value)
+  value > BUST_LIMIT
 end
 
 def hand_value(hand)
@@ -52,19 +54,16 @@ def hand_value(hand)
 
   # Ace value 1 or 11
   cards.select { |card| card == 'A' }.count.times do
-    value -= 10 if value > 21
+    value -= 10 if value > BUST_LIMIT
   end
 
   value
 end
 
-def calculate_result(player_hand, dealer_hand)
-  player_value = hand_value(player_hand)
-  dealer_value = hand_value(dealer_hand)
-
-  if player_value > 21
+def calculate_result(player_value, dealer_value)
+  if player_value > BUST_LIMIT
     :player_busted
-  elsif dealer_value > 21
+  elsif dealer_value > BUST_LIMIT
     :dealer_busted
   elsif player_value > dealer_value
     :player
@@ -75,38 +74,18 @@ def calculate_result(player_hand, dealer_hand)
   end
 end
 
-def display_result(player_hand, dealer_hand)
-  result = calculate_result(player_hand, dealer_hand)
-
+def display_result(result)
   case result
   when :player_busted
-    prompt "You busted! Dealer wins!"
+    prompt "You busted! Dealer wins!\n\n"
   when :dealer_busted
-    prompt "Dealer busted! You win!"
+    prompt "Dealer busted! You win!\n\n"
   when :player
-    prompt "You win!"
+    prompt "You win!\n\n"
   when :dealer
-    prompt "Dealer wins!"
+    prompt "Dealer wins!\n\n"
   when :tie
-    prompt "It's a tie!"
-  end
-end
-
-def player_turn(deck, player_hand)
-  loop do
-    call = hit_or_stay
-
-    if call == 'h'
-      player_hand << deal!(deck)
-      prompt "You chose to hit!\n\n"
-      sleep 1
-      prompt "Your hand: #{player_hand}"
-      sleep 0.5
-      prompt "Hand value: #{hand_value(player_hand)}\n\n"
-      sleep 1
-    end
-
-    break if call == 's' || busted?(player_hand)
+    prompt "It's a tie!\n\n"
   end
 end
 
@@ -121,12 +100,35 @@ def hit_or_stay
   call
 end
 
-def dealer_turn(deck, dealer_hand)
+def player_turn(deck, player_hand)
   loop do
-    break if hand_value(dealer_hand) >= 17
+    call = hit_or_stay
+
+    if call == 'h'
+      player_hand << deal!(deck)
+      player_value = hand_value(player_hand)
+      prompt "You chose to hit!\n\n"
+      sleep 1
+      prompt "Your hand: #{player_hand}"
+      sleep 0.5
+      prompt "Hand value: #{player_value}\n\n"
+      sleep 1
+    end
+
+    break if call == 's' || busted?(player_value)
+  end
+end
+
+def dealer_turn(deck, dealer_hand, dealer_value)
+  puts "Dealer's turn now...\n\n"
+  sleep 1.5
+
+  loop do
+    break if dealer_value >= DEALER_STAY
 
     prompt "Dealer hits!"
     dealer_hand << deal!(deck)
+    dealer_value = hand_value(dealer_hand)
     sleep 1
     prompt "Dealer's current hand: #{dealer_hand}\n\n"
     sleep 1
@@ -140,62 +142,124 @@ def play_again?
   answer.downcase.start_with?('y')
 end
 
-# Main Game Loop
-loop do
-  system 'clear'
-  prompt "Welcome to Twenty-One! Let's Start!\n\n"
-  sleep 1
+# Both player and dealer chose to stay, we compare hands
+def grand_output(player_hand, dealer_hand, scores)
+  player_value = hand_value(player_hand)
+  dealer_value = hand_value(dealer_hand)
 
-  # Initialize variables
-  deck = initialize_deck
-  player_hand = []
-  dealer_hand = []
-
-  # Deal initial hands
-  deal_initial_hands(deck, player_hand, dealer_hand)
-
-  # Display initial hands
-  display_hands(player_hand, dealer_hand)
-
-  # Player turn
-  player_turn(deck, player_hand)
-
-  if busted?(player_hand)
-    display_result(player_hand, dealer_hand)
-    play_again? ? next : break
-  else
-    prompt "You chose to stay! Value: #{hand_value(player_hand)}\n\n"
-    sleep 1
-  end
-
-  puts "Dealer's turn now...\n\n"
-  sleep 1.5
-  # Dealer turn
-  dealer_turn(deck, dealer_hand)
-
-  if busted?(dealer_hand)
-    prompt "Dealer's hand value: #{hand_value(dealer_hand)}\n\n"
-    display_result(player_hand, dealer_hand)
-    play_again? ? next : break
-  else
-    prompt "Dealer chose to stay! Value: #{hand_value(dealer_hand)}\n\n"
-    sleep 1
-  end
-
-  # Endgame
   puts "===================="
   sleep 0.5
-  prompt "Dealer has #{dealer_hand} and Hand Value: #{hand_value(dealer_hand)}"
+  prompt "Dealer has #{dealer_hand} and Hand Value: #{dealer_value}"
   sleep 0.5
-  prompt "Player has #{player_hand} and Hand Value: #{hand_value(player_hand)}"
+  prompt "Player has #{player_hand} and Hand Value: #{player_value}"
   sleep 0.5
   puts "====================\n\n"
+  sleep 1.5
+
+  result = calculate_result(player_value, dealer_value)
+
+  display_result(result)
+  update_scores(scores, result)
   sleep 2
+end
 
-  display_result(player_hand, dealer_hand)
+def display_scores(scores)
+  prompt "Player Score: #{scores[:player]}"
+  prompt "Dealer Score: #{scores[:dealer]}\n\n"
   sleep 1
+end
 
-  puts ""
+def display_grandwinner(scores)
+  system 'clear'
+  display_scores(scores)
+
+  winner = scores.key(WINSTATE)
+
+  case winner
+  when :player
+    prompt "Congratulations!! You are the Grand Winner!\n\n"
+    sleep 1
+  when :dealer
+    prompt "Better luck next time! The Dealer is the Grand Winner!\n\n"
+    sleep 1
+  end
+end
+
+def update_scores(scores, result)
+  case result
+  when :player_busted
+    scores[:dealer] += 1
+  when :dealer_busted
+    scores[:player] += 1
+  when :player
+    scores[:player] += 1
+  when :dealer
+    scores[:dealer] += 1
+  when :tie
+    prompt "It's a tie!\n\n"
+  end
+end
+
+# Main Game Loop
+loop do
+  # Initialize Scores
+  scores = { player: 0, dealer: 0 }
+
+  # Game Loop
+  loop do
+    break if scores.values.include?(WINSTATE)
+
+    system 'clear'
+    prompt "Welcome to Twenty-One!\n\n"
+    sleep 1
+
+    # Display Scores
+    display_scores(scores)
+    
+    # Initialize variables
+    deck = initialize_deck
+    player_hand = []
+    dealer_hand = []
+
+    # Deal initial hands
+    deal_initial_hands(deck, player_hand, dealer_hand)
+
+    # Initialize hand values
+    player_value = hand_value(player_hand)
+    dealer_value = hand_value(dealer_hand)
+
+    # Display initial hands
+    display_hands(player_hand, dealer_hand, player_value)
+
+    # Player turn
+    player_turn(deck, player_hand)
+    player_value = hand_value(player_hand)
+
+    if busted?(player_value)
+      grand_output(player_hand, dealer_hand, scores)
+      next
+    else
+      prompt "You chose to stay! Value: #{player_value}\n\n"
+      sleep 1
+    end
+
+    # Dealer turn
+    dealer_turn(deck, dealer_hand, dealer_value)
+    dealer_value = hand_value(dealer_hand)
+
+    if busted?(dealer_value)
+      grand_output(player_hand, dealer_hand, scores)
+      next
+    else
+      prompt "Dealer chose to stay! Value: #{dealer_value}\n\n"
+      sleep 1
+    end
+
+    grand_output(player_hand, dealer_hand, scores)
+  end
+
+  display_grandwinner(scores)
+
   break unless play_again?
 end
 
