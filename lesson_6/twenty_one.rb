@@ -195,8 +195,6 @@ def update_scores(scores, result)
     scores[:player] += 1
   when :dealer
     scores[:dealer] += 1
-  when :tie
-    prompt "It's a tie!\n\n"
   end
 end
 
